@@ -3,6 +3,9 @@ import { Products } from './components/Models/Products.ts';
 import { Basket } from './components/Models/Basket.ts';
 import { Buyer } from './components/Models/Buyer.ts';
 import { apiProducts } from './utils/data.ts';
+import { Api } from './components/base/Api.ts';
+import { Communication } from './components/Models/Communication.ts';
+import { API_URL } from './utils/constants.ts';
 
 const productsModel = new Products([]);
 
@@ -73,3 +76,15 @@ console.log('Валидация после частичного set(payment=cash
 buyerModel.set({ phone: '+7 111 000-00-00', address: 'Санкт-Петербург, Невский пр., 10' });
 console.log('После полного заполнения через set(): ', buyerModel.get());
 console.log('Валидация после заполнения через set(): ', buyerModel.validate());
+
+const api = new Api(API_URL);
+const communication = new Communication(api);
+
+communication.fetchProducts()
+  .then((items) => {
+    productsModel.setItems(items);
+    console.log('Каталог, полученный с сервера и сохраненный в модель: ', productsModel.getItems());
+  })
+  .catch((error) => {
+    console.error('Ошибка при запросе каталога:', error);
+  });

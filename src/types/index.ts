@@ -31,3 +31,17 @@ export interface IBuyerValidation {
 };
 
 
+export interface IProductListResponse {
+  total: number;
+  items: IProduct[];
+}
+
+export interface IOrderRequest extends IBuyer {
+  items: string[];
+}
+
+export interface IOrderResponse {
+  id: string;
+  total: number;
+}
+
