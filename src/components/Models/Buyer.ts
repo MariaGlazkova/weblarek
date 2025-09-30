@@ -6,11 +6,11 @@ export class Buyer {
   phone: string;
   address: string;
 
-  constructor(data: IBuyer) {
-    this.payment = data.payment;
-    this.email = data.email;
-    this.phone = data.phone;
-    this.address = data.address;
+  constructor() {
+    this.payment = '';
+    this.email = '';
+    this.phone = '';
+    this.address = '';
   }
 
   set(data: Partial<IBuyer>): void {
@@ -26,22 +26,6 @@ export class Buyer {
      if (data.address) {
       this.address = data.address;
     }
-  }
-
-  setPayment(payment: TPayment | ''): void {
-    this.payment = payment;
-  }
-
-  setEmail(email: string): void {
-    this.email = email;
-  }
-
-  setPhone(phone: string): void {
-    this.phone = phone;
-  }
-
-  setAddress(address: string): void {
-    this.address = address;
   }
 
   get(): IBuyer {
@@ -61,7 +45,7 @@ export class Buyer {
   }
 
   validate(): IBuyerValidation {
-    let validateMessages: IBuyerValidation = {
+    const validateMessages: IBuyerValidation = {
       payment: null,
       email: null,
       phone: null,

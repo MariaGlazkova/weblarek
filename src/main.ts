@@ -44,30 +44,9 @@ console.log('Mассив товаров в корзине после очист�
 console.log('Количество товаров в корзине после очистки: ', basketModel.getCount());
 
 
-const buyerModel = new Buyer({
-      payment: '',
-      email: '',
-      phone: '',
-      address: '',
-});
+const buyerModel = new Buyer();
 
 console.log('Проверка валидации при пустых полях: ', buyerModel.validate());
-buyerModel.setPayment('card');
-console.log('После выбора оплаты (card): ', buyerModel.validate());
-
-buyerModel.setEmail('user@example.com');
-console.log('После заполнения email: ', buyerModel.validate());
-
-buyerModel.setPhone('+7 111 111-11-11');
-console.log('После заполнения телефона: ', buyerModel.validate());
-
-buyerModel.setAddress('г. Москва, ул. Практикума, д. 1');
-console.log('После заполнения адреса (все поля валидны): ', buyerModel.validate());
-console.log('Текущие данные покупателя через get(): ', buyerModel.get());
-
-buyerModel.clear();
-console.log('После clear() (все поля пусты): ', buyerModel.get());
-console.log('валидация после clear(): ', buyerModel.validate());
 
 buyerModel.set({ payment: 'cash', email: 'cash@example.com' });
 console.log('После частичного set(payment=cash, email): ', buyerModel.get());
@@ -76,6 +55,10 @@ console.log('Валидация после частичного set(payment=cash
 buyerModel.set({ phone: '+7 111 000-00-00', address: 'Санкт-Петербург, Невский пр., 10' });
 console.log('После полного заполнения через set(): ', buyerModel.get());
 console.log('Валидация после заполнения через set(): ', buyerModel.validate());
+
+buyerModel.clear();
+console.log('После clear() (все поля пусты): ', buyerModel.get());
+console.log('Валидация после clear(): ', buyerModel.validate());
 
 const api = new Api(API_URL);
 const communication = new Communication(api);
