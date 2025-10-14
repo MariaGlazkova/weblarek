@@ -306,6 +306,40 @@ constructor(container: HTMLElement)
 
 #### Карточки товаров
 
+Родительский класс **ProductCard**, включающий общий функционал для всех дочерних классов.
+Три дочерних класса, которые наследуются от родительского класса **ProductCard**:
+
+- карточка товара в каталоге (CatalogProductCard),
+- карточка товара для подробного просмотра (PreviewProductCard),
+- карточка товара в корзине (BasketProductCard).
+
+##### Класс ProductCard
+
+Назначение: Базовый класс для всех карточек товаров. Реализует общую логику отображения изображения, названия, категории и цены.
+
+Конструктор:
+
+```ts
+constructor(container: HTMLElement)
+```
+
+Поля:
+
+- `title: HTMLElement` — элемент с названием товара.
+- `price: HTMLElement` — элемент с ценой товара.
+- `image: HTMLImageElement` — элемент с изображением товара.
+- `category: HTMLElement` — элемент с категорией товара.
+- `button: HTMLButtonElement` — кнопка действия (“Купить”, “Удалить” и т.п.).
+
+Методы:
+
+- `setTitle(value: string): void` — устанавливает название товара.
+- `setPrice(value: number | null): void` — устанавливает цену товара или отображает “Бесценно”, - `если значение null.
+- `setImage(src: string, alt?: string): void` — задаёт изображение товара.
+- `setCategory(value: string): void` — отображает категорию товара.
+- `setButtonLabel(label: string): void` — изменяет текст кнопки.
+- `render(data: IProduct): HTMLElement` — отрисовывает карточку с переданными данными.
+
 #### Класс Basket
 
 Назначение: Отвечает за отображение содержимого корзины, списка товаров и итоговой суммы заказа.
