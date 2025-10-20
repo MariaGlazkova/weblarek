@@ -401,7 +401,7 @@ constructor(container: HTMLElement)
 
 ##### Класс Form
 
-Назначение: Родительский класс для всех существующих форм в Приложении. Объединяет в себе валидацию, обработчики событий и отображение ошибок всех своих дочерних классов.
+Назначение: Родительский класс для всех форм в Приложении. Объединяет в себе валидацию, обработчики событий и отображение ошибок всех своих дочерних классов.
 
 Дочерние элементы (формы):
 
@@ -416,11 +416,58 @@ constructor(container: HTMLFormElement)
 
 Поля:
 
-- `
+- `submitButton: HTMLButtonElement` — кнопка отправки формы,
+- `errorElement: HTMLElement` - отображение ошибок валидации.
 
 Методы:
 
-- `
+- `onSubmit(handler: (data: object) => void): void` — назначение обработчика отправки формы,
+- `setErrorMessage(field: string, message: string): void` — отображени сообщения об ошибке для конкретного поля,
+- `clearErrors(): void` — очищение ошибки формы,
+- `render(): HTMLElement` — отрисовка формы.
+
+##### Класс PaymentForm
+
+Назначение: Является дочерним от класса Form. Отвечает за рендеринг формы обработки данных заказа. При изменении способа оплаты вызывает событие 'payment:change'.
+Валидирует заполненность адреса перед переходом к следующему шагу.
+
+Конструктор:
+
+```ts
+constructor(container: HTMLFormElement)
+```
+
+Поля:
+
+- `paymentOptions: NodeListOf<HTMLInputElement>` — изменение способов оплаты (“Картой”, или“Наличными”).
+- `addressInput: HTMLInputElement` — поле ввода адреса.
+
+Методы:
+
+- `setPayment(value: TPayment): void` — сохраняет выбранный способ оплаты.
+- `setAddress(value: string): void` — записывает адрес.
+- `validate(): Record<string, string>` — проверяет корректность заполнения полей формы.
+
+##### Класс СontactForm
+
+Назначение: Отвечает за рендеринг формы обработки данных покупателя (email и телефон). При успешной отправке вызывает событие 'order:submit'.
+
+Конструктор:
+
+```ts
+constructor(container: HTMLFormElement)
+```
+
+Поля:
+
+- `emailInput: HTMLInputElement` — поле ввода электронной почты,
+- `phoneInput: HTMLInputElement` — поле ввода телефона.
+
+Методы:
+
+- `setEmail(value: string): void` — устанавливает значение email,
+- `setPhone(value: string): void` — устанавливает значение телефона,
+- `validate(): Record<string, string>` — проверяет корректность введённых данных.
 
 #### Класс OrderSuccessView
 
