@@ -1,11 +1,12 @@
 import { IProduct } from '../../types/index.ts'
+import { EventEmitter } from '../base/Events'
 
-export class Products {
+export class Products extends EventEmitter {
   items: IProduct[];
   selectedId: string | null = null;
 
-
   constructor(initialItems: IProduct[]) {
+    super();
     this.items = initialItems;
   }
 
@@ -15,6 +16,7 @@ export class Products {
 
   setItems(items: IProduct[]): void {
     this.items = items;
+    this.emit('items:changed', { items });
   }
 
   getItemById(id: string): IProduct | null {
@@ -27,6 +29,7 @@ export class Products {
 
   setSelectedId(id: string | null): void {
     this.selectedId = id;
+    this.emit('product:select', { id });
   }
 
   getSelected(): IProduct | null {
