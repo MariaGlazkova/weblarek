@@ -30,7 +30,6 @@ export class PreviewProductCard extends ProductCard {
         this.setButtonLabel('Недоступно');
         this.button.disabled = true;
       } else {
-        // Проверяем, находится ли товар в корзине
         const isInBasket = this.basketModel.has(data.id!);
 
         if (isInBasket) {
@@ -41,7 +40,6 @@ export class PreviewProductCard extends ProductCard {
               detail: { id: data.id },
               bubbles: true
             }));
-            // Закрываем модальное окно после удаления
             this.button!.dispatchEvent(new CustomEvent('modal:close', {
               bubbles: true
             }));
@@ -54,7 +52,6 @@ export class PreviewProductCard extends ProductCard {
               detail: { id: data.id },
               bubbles: true
             }));
-            // Закрываем модальное окно после добавления
             this.button!.dispatchEvent(new CustomEvent('modal:close', {
               bubbles: true
             }));

@@ -5,7 +5,7 @@ import { Buyer } from './components/Models/Buyer';
 import { Api } from './components/base/Api';
 import { Communication } from './components/Models/Communication';
 import { API_URL } from './utils/constants';
-import { cloneTemplate } from './utils/utils';
+import { cloneTemplate, ensureElement } from './utils/utils';
 import { apiProducts } from './utils/data';
 
 // View компоненты
@@ -22,16 +22,12 @@ import { BasketProductCard } from './components/Views/BasketProductCard';
 import { PaymentForm } from './components/Forms/PaymentForm';
 import { ContactForm } from './components/Forms/ContactForm';
 
-// Инициализация моделей
 const productsModel = new Products([]);
 const basketModel = new Basket();
 const buyerModel = new Buyer();
 
-// Инициализация API
 const api = new Api(API_URL);
 const communication = new Communication(api);
-
-// Инициализация View компонентов
 let headerElement: HTMLElement;
 let galleryElement: HTMLElement;
 let modalElement: HTMLElement;
@@ -39,35 +35,19 @@ let headerView: HeaderView;
 let galleryView: GalleryView;
 let modalView: ModalView;
 
-// Ждем загрузки DOM
 document.addEventListener('DOMContentLoaded', () => {
-  headerElement = document.querySelector('.header') as HTMLElement;
-  galleryElement = document.querySelector('.gallery') as HTMLElement;
-  modalElement = document.querySelector('#modal-container') as HTMLElement;
-
-  // Проверяем, что все элементы найдены
-  if (!headerElement || !galleryElement || !modalElement) {
-    console.error('Не удалось найти необходимые DOM элементы:', {
-      header: !!headerElement,
-      gallery: !!galleryElement,
-      modal: !!modalElement
-    });
-    return;
-  }
+  headerElement = ensureElement<HTMLElement>('.header');
+  galleryElement = ensureElement<HTMLElement>('.gallery');
+  modalElement = ensureElement<HTMLElement>('#modal-container');
 
   headerView = new HeaderView(headerElement);
   galleryView = new GalleryView(galleryElement);
   modalView = new ModalView(modalElement);
 
-  // Инициализируем обработчики после создания View компонентов
   initializeEventHandlers();
 });
 
-// Функция инициализации обработчиков событий
 function initializeEventHandlers() {
-  // Обработчики событий моделей
-
-  // Обработка изменения каталога товаров
   productsModel.on('items:changed', () => {
     const items = productsModel.getItems();
     const cards = items.map(item => {
@@ -79,7 +59,6 @@ function initializeEventHandlers() {
     galleryView.render({ items: cards });
   });
 
-  // Обработка выбора товара для просмотра
   productsModel.on('product:select', (data: { id: string | null }) => {
     if (data.id) {
       const product = productsModel.getItemById(data.id);
@@ -92,7 +71,6 @@ function initializeEventHandlers() {
     }
   });
 
-  // Обработка изменения корзины
   basketModel.on('basket:add', () => {
     updateBasketView();
     updateHeaderCounter();
@@ -108,25 +86,18 @@ function initializeEventHandlers() {
     updateHeaderCounter();
   });
 
-  // Обработка изменения данных покупателя
   buyerModel.on('buyer:payment:change', () => {
-    // Обновление UI при изменении способа оплаты
   });
 
   buyerModel.on('buyer:address:change', () => {
-    // Обновление UI при изменении адреса
   });
 
-  // Обработчики событий представлений
-
-  // Обработка выбора карточки товара
   document.addEventListener('product:select', (event: Event) => {
     const customEvent = event as CustomEvent;
     const { id } = customEvent.detail;
     productsModel.setSelectedId(id);
   });
 
-  // Обработка добавления товара в корзину
   document.addEventListener('product:add', (event: Event) => {
     const customEvent = event as CustomEvent;
     const { id } = customEvent.detail;
@@ -136,31 +107,27 @@ function initializeEventHandlers() {
     }
   });
 
-  // Обработка удаления товара из корзины
   document.addEventListener('product:remove', (event: Event) => {
     const customEvent = event as CustomEvent;
     const { id } = customEvent.detail;
     basketModel.remove(id);
   });
 
-  // Обработка открытия корзины
-  headerElement.querySelector('.header__basket')?.addEventListener('click', () => {
+  const basketButton = ensureElement<HTMLElement>('.header__basket', headerElement);
+  basketButton.addEventListener('click', () => {
     showBasketModal();
   });
 
-  // Обработка изменения способа оплаты
   document.addEventListener('payment:change', (event: Event) => {
     const customEvent = event as CustomEvent;
     const { payment } = customEvent.detail;
     buyerModel.set({ payment });
   });
 
-  // Обработка оформления заказа
   document.addEventListener('basket:order', () => {
     showPaymentForm();
   });
 
-  // Обработка отправки формы заказа
   document.addEventListener('order:submit', (event: Event) => {
     const customEvent = event as CustomEvent;
     const { email, phone } = customEvent.detail;
@@ -168,16 +135,13 @@ function initializeEventHandlers() {
     completeOrder();
   });
 
-  // Обработка закрытия модального окна
   document.addEventListener('modal:close', () => {
     modalView.close();
   });
 
-  // Загружаем товары после инициализации всех обработчиков
   loadProducts();
 }
 
-// Вспомогательные функции
 
 function updateBasketView() {
   const items = basketModel.getItems();
@@ -212,7 +176,6 @@ function showPaymentForm() {
   const paymentElement = cloneTemplate<HTMLElement>('#order');
   const paymentForm = new PaymentForm(paymentElement as HTMLFormElement, buyerModel);
 
-  // Устанавливаем текущие данные покупателя
   const buyerData = buyerModel.get();
   if (buyerData.payment) {
     paymentForm.setPayment(buyerData.payment);
@@ -221,7 +184,6 @@ function showPaymentForm() {
     paymentForm.setAddress(buyerData.address);
   }
 
-  // Обработка отправки формы оплаты
   paymentForm.onSubmit((data: object) => {
     const formData = data as Record<string, string>;
     const errors = paymentForm.validate();
@@ -229,7 +191,6 @@ function showPaymentForm() {
       buyerModel.set({ address: formData.address });
       showContactForm();
     } else {
-      // Показать ошибки
       Object.entries(errors).forEach(([field, message]) => {
         paymentForm.setErrorMessage(field, message);
       });
@@ -243,7 +204,6 @@ function showContactForm() {
   const contactElement = cloneTemplate<HTMLElement>('#contacts');
   const contactForm = new ContactForm(contactElement as HTMLFormElement, buyerModel);
 
-  // Устанавливаем текущие данные покупателя
   const buyerData = buyerModel.get();
   if (buyerData.email) {
     contactForm.setEmail(buyerData.email);
@@ -252,7 +212,6 @@ function showContactForm() {
     contactForm.setPhone(buyerData.phone);
   }
 
-  // Обработка отправки формы контактов
   contactForm.onSubmit((data: object) => {
     const formData = data as Record<string, string>;
     const errors = contactForm.validate();
@@ -262,7 +221,6 @@ function showContactForm() {
         bubbles: true
       }));
     } else {
-      // Показать ошибки
       Object.entries(errors).forEach(([field, message]) => {
         contactForm.setErrorMessage(field, message);
       });
@@ -288,7 +246,6 @@ function completeOrder() {
     })
     .catch((error) => {
       console.error('Ошибка при создании заказа:', error);
-      // Fallback - показываем успех даже при ошибке сервера
       showOrderSuccess(orderData.total);
       basketModel.clear();
       buyerModel.clear();
@@ -300,15 +257,14 @@ function showOrderSuccess(total: number) {
   const successView = new OrderSuccessView(successElement);
   successView.render({ total });
 
-  // Обработка закрытия окна успеха
-  successElement.querySelector('.order-success__close')?.addEventListener('click', () => {
+  const closeButton = ensureElement<HTMLElement>('.order-success__close', successElement);
+  closeButton.addEventListener('click', () => {
     modalView.close();
   });
 
   modalView.open(successElement);
 }
 
-// Функция загрузки товаров
 function loadProducts() {
   communication.fetchProducts()
     .then((items) => {

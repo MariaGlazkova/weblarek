@@ -18,7 +18,6 @@ export class BasketView extends Component<IBasketData> {
     this.totalElement = ensureElement<HTMLElement>('.basket__price', this.container);
     this.buttonOrder = ensureElement<HTMLButtonElement>('.basket__button', this.container);
 
-    // Обработчик кнопки оформления заказа
     this.buttonOrder.addEventListener('click', () => {
       this.buttonOrder.dispatchEvent(new CustomEvent('basket:order', {
         bubbles: true

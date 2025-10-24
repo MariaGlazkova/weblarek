@@ -15,21 +15,18 @@ export class ProductCard extends Component<IProduct> {
     this.title = ensureElement<HTMLElement>('.card__title', this.container);
     this.price = ensureElement<HTMLElement>('.card__price', this.container);
 
-    // Категория может отсутствовать в некоторых шаблонах (например, в корзине)
     try {
       this.category = ensureElement<HTMLElement>('.card__category', this.container);
     } catch {
       this.category = null;
     }
 
-    // Изображение может отсутствовать в некоторых шаблонах (например, в корзине)
     try {
       this.image = ensureElement<HTMLImageElement>('.card__image', this.container);
     } catch {
       this.image = null;
     }
 
-    // Кнопка может отсутствовать в некоторых шаблонах
     try {
       this.button = ensureElement<HTMLButtonElement>('.card__button', this.container);
     } catch {
