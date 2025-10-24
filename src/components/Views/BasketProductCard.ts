@@ -17,7 +17,7 @@ export class BasketProductCard extends ProductCard {
 
     if (this.button) {
       this.button.addEventListener('click', () => {
-        this.button!.dispatchEvent(new CustomEvent('product:remove', {
+        document.dispatchEvent(new CustomEvent('product:remove', {
           detail: { id: data.id },
           bubbles: true
         }));

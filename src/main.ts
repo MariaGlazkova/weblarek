@@ -111,6 +111,8 @@ function initializeEventHandlers() {
     const customEvent = event as CustomEvent;
     const { id } = customEvent.detail;
     basketModel.remove(id);
+    updateBasketModalContent();
+    updateHeaderCounter();
   });
 
   const basketButton = ensureElement<HTMLElement>('.header__basket', headerElement);
@@ -161,6 +163,26 @@ function updateBasketView() {
   });
 
   return basketElement;
+}
+
+function updateBasketModalContent() {
+  const basketElement = modalView.getContent().querySelector('.basket');
+  if (basketElement) {
+    const items = basketModel.getItems();
+    const cards = items.map(item => {
+      const cardElement = cloneTemplate<HTMLElement>('#card-basket');
+      const cardView = new BasketProductCard(cardElement);
+      cardView.render(item);
+      return cardElement;
+    });
+
+    const basketView = new BasketView(basketElement as HTMLElement);
+    basketView.render({
+      items: cards,
+      total: basketModel.getTotal(),
+      buttonState: items.length > 0
+    });
+  }
 }
 
 function updateHeaderCounter() {
