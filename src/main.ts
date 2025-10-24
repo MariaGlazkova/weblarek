@@ -85,7 +85,7 @@ function initializeEventHandlers() {
       const product = productsModel.getItemById(data.id);
       if (product) {
         const cardElement = cloneTemplate<HTMLElement>('#card-preview');
-        const cardView = new PreviewProductCard(cardElement);
+        const cardView = new PreviewProductCard(cardElement, basketModel);
         cardView.render(product);
         modalView.open(cardElement);
       }
@@ -168,6 +168,11 @@ function initializeEventHandlers() {
     completeOrder();
   });
 
+  // Обработка закрытия модального окна
+  document.addEventListener('modal:close', () => {
+    modalView.close();
+  });
+
   // Загружаем товары после инициализации всех обработчиков
   loadProducts();
 }
@@ -205,7 +210,7 @@ function showBasketModal() {
 
 function showPaymentForm() {
   const paymentElement = cloneTemplate<HTMLElement>('#order');
-  const paymentForm = new PaymentForm(paymentElement as HTMLFormElement);
+  const paymentForm = new PaymentForm(paymentElement as HTMLFormElement, buyerModel);
 
   // Устанавливаем текущие данные покупателя
   const buyerData = buyerModel.get();
@@ -236,7 +241,7 @@ function showPaymentForm() {
 
 function showContactForm() {
   const contactElement = cloneTemplate<HTMLElement>('#contacts');
-  const contactForm = new ContactForm(contactElement as HTMLFormElement);
+  const contactForm = new ContactForm(contactElement as HTMLFormElement, buyerModel);
 
   // Устанавливаем текущие данные покупателя
   const buyerData = buyerModel.get();
@@ -311,7 +316,6 @@ function loadProducts() {
     })
     .catch((error) => {
       console.error('Ошибка при запросе каталога:', error);
-      console.log('Сервер недоступен, используем локальные данные как fallback');
       productsModel.setItems(apiProducts.items);
     });
 }

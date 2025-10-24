@@ -1,49 +1,83 @@
 import { Form } from './Form';
 import { ensureElement } from '../../utils/utils';
+import { Buyer } from '../Models/Buyer';
 
 export class ContactForm extends Form {
   protected emailInput: HTMLInputElement;
   protected phoneInput: HTMLInputElement;
+  private buyerModel: Buyer;
 
-  constructor(container: HTMLFormElement) {
+  constructor(container: HTMLFormElement, buyerModel: Buyer) {
     super(container);
+    this.buyerModel = buyerModel;
     this.emailInput = ensureElement<HTMLInputElement>('input[name="email"]', this.container);
     this.phoneInput = ensureElement<HTMLInputElement>('input[name="phone"]', this.container);
+
+    this.setupValidation();
   }
 
   setEmail(value: string): void {
     this.emailInput.value = value;
+    this.updateButtonState();
   }
 
   setPhone(value: string): void {
     this.phoneInput.value = value;
+    this.updateButtonState();
   }
 
   validate(): Record<string, string> {
     const errors: Record<string, string> = {};
 
-    if (!this.emailInput.value.trim()) {
-      errors.email = 'Введите email';
-    } else if (!this.isValidEmail(this.emailInput.value)) {
-      errors.email = 'Введите корректный email';
-    }
+    // Обновляем данные в модели перед валидацией
+    this.buyerModel.set({
+      email: this.emailInput.value,
+      phone: this.phoneInput.value
+    });
 
-    if (!this.phoneInput.value.trim()) {
-      errors.phone = 'Введите номер телефона';
-    } else if (!this.isValidPhone(this.phoneInput.value)) {
-      errors.phone = 'Введите корректный номер телефона';
+    // Используем валидацию из модели Buyer
+    const validation = this.buyerModel.validate();
+
+    if (validation.email) {
+      errors.email = validation.email;
+    }
+    if (validation.phone) {
+      errors.phone = validation.phone;
     }
 
     return errors;
   }
 
-  private isValidEmail(email: string): boolean {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email);
+
+  private updateButtonState(): void {
+    const errors = this.validate();
+    const isValid = Object.keys(errors).length === 0;
+    this.setButtonState(isValid);
+
+    // Показываем ошибки в реальном времени
+    this.displayErrors(errors);
   }
 
-  private isValidPhone(phone: string): boolean {
-    const phoneRegex = /^[\+]?[0-9\s\-\(\)]{10,}$/;
-    return phoneRegex.test(phone.replace(/\s/g, ''));
+  private displayErrors(errors: Record<string, string>): void {
+    // Очищаем предыдущие ошибки
+    this.clearErrors();
+
+    // Показываем первую ошибку
+    const firstError = Object.values(errors)[0];
+    if (firstError) {
+      this.setErrorMessage('', firstError);
+    }
+  }
+
+  private setupValidation(): void {
+    // Обновляем состояние кнопки при изменении email
+    this.emailInput.addEventListener('input', () => {
+      this.updateButtonState();
+    });
+
+    // Обновляем состояние кнопки при изменении телефона
+    this.phoneInput.addEventListener('input', () => {
+      this.updateButtonState();
+    });
   }
 }

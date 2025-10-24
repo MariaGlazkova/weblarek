@@ -1,13 +1,16 @@
 import { ProductCard } from './ProductCard';
 import { ensureElement, setElementData } from '../../utils/utils';
 import { IProduct } from '../../types';
+import { Basket } from '../Models/Basket';
 
 export class PreviewProductCard extends ProductCard {
   protected description: HTMLElement;
+  private basketModel: Basket;
 
-  constructor(container: HTMLElement) {
+  constructor(container: HTMLElement, basketModel: Basket) {
     super(container);
     this.description = ensureElement<HTMLElement>('.card__text', this.container);
+    this.basketModel = basketModel;
   }
 
   setDescription(value: string): void {
@@ -24,17 +27,39 @@ export class PreviewProductCard extends ProductCard {
 
     if (this.button) {
       if (data.price === null) {
-        this.setButtonLabel('Нельзя купить');
+        this.setButtonLabel('Недоступно');
         this.button.disabled = true;
       } else {
-        this.setButtonLabel('В корзину');
-        this.button.disabled = false;
-        this.button.addEventListener('click', () => {
-          this.button!.dispatchEvent(new CustomEvent('product:add', {
-            detail: { id: data.id },
-            bubbles: true
-          }));
-        });
+        // Проверяем, находится ли товар в корзине
+        const isInBasket = this.basketModel.has(data.id!);
+
+        if (isInBasket) {
+          this.setButtonLabel('Удалить из корзины');
+          this.button.disabled = false;
+          this.button.addEventListener('click', () => {
+            this.button!.dispatchEvent(new CustomEvent('product:remove', {
+              detail: { id: data.id },
+              bubbles: true
+            }));
+            // Закрываем модальное окно после удаления
+            this.button!.dispatchEvent(new CustomEvent('modal:close', {
+              bubbles: true
+            }));
+          });
+        } else {
+          this.setButtonLabel('Купить');
+          this.button.disabled = false;
+          this.button.addEventListener('click', () => {
+            this.button!.dispatchEvent(new CustomEvent('product:add', {
+              detail: { id: data.id },
+              bubbles: true
+            }));
+            // Закрываем модальное окно после добавления
+            this.button!.dispatchEvent(new CustomEvent('modal:close', {
+              bubbles: true
+            }));
+          });
+        }
       }
     }
 

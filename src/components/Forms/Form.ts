@@ -14,18 +14,22 @@ export class Form extends Component<HTMLFormElement> {
   onSubmit(handler: (data: object) => void): void {
     this.container.addEventListener('submit', (e) => {
       e.preventDefault();
-      const formData = new FormData(this.container);
+      const formData = new FormData(this.container as HTMLFormElement);
       const data = Object.fromEntries(formData.entries());
       handler(data);
     });
   }
 
-  setErrorMessage(field: string, message: string): void {
+  setErrorMessage(_field: string, message: string): void {
     this.errorElement.textContent = message;
   }
 
   clearErrors(): void {
     this.errorElement.textContent = '';
+  }
+
+  setButtonState(active: boolean): void {
+    this.submitButton.disabled = !active;
   }
 
   render(): HTMLElement {

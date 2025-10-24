@@ -1,21 +1,33 @@
 import { Component } from '../base/Component';
 import { ensureElement } from '../../utils/utils';
 import { IProduct } from '../../types';
-import { categoryMap } from '../../utils/constants';
+import { categoryMap, CDN_URL } from '../../utils/constants';
 
 export class ProductCard extends Component<IProduct> {
   protected title: HTMLElement;
   protected price: HTMLElement;
-  protected image: HTMLImageElement;
-  protected category: HTMLElement;
+  protected image: HTMLImageElement | null;
+  protected category: HTMLElement | null;
   protected button: HTMLButtonElement | null;
 
   constructor(container: HTMLElement) {
     super(container);
     this.title = ensureElement<HTMLElement>('.card__title', this.container);
     this.price = ensureElement<HTMLElement>('.card__price', this.container);
-    this.image = ensureElement<HTMLImageElement>('.card__image', this.container);
-    this.category = ensureElement<HTMLElement>('.card__category', this.container);
+
+    // Категория может отсутствовать в некоторых шаблонах (например, в корзине)
+    try {
+      this.category = ensureElement<HTMLElement>('.card__category', this.container);
+    } catch {
+      this.category = null;
+    }
+
+    // Изображение может отсутствовать в некоторых шаблонах (например, в корзине)
+    try {
+      this.image = ensureElement<HTMLImageElement>('.card__image', this.container);
+    } catch {
+      this.image = null;
+    }
 
     // Кнопка может отсутствовать в некоторых шаблонах
     try {
@@ -38,17 +50,22 @@ export class ProductCard extends Component<IProduct> {
   }
 
   setImageSrc(src: string, alt?: string): void {
-    this.image.src = src;
-    if (alt) {
-      this.image.alt = alt;
+    if (this.image) {
+      const fullImageUrl = CDN_URL + src;
+      this.image.src = fullImageUrl;
+      if (alt) {
+        this.image.alt = alt;
+      }
     }
   }
 
   setCategory(value: string): void {
-    this.category.textContent = value;
-    this.category.className = 'card__category';
-    if (value in categoryMap) {
-      this.category.classList.add(categoryMap[value as keyof typeof categoryMap]);
+    if (this.category) {
+      this.category.textContent = value;
+      this.category.className = 'card__category';
+      if (value in categoryMap) {
+        this.category.classList.add(categoryMap[value as keyof typeof categoryMap]);
+      }
     }
   }
 
