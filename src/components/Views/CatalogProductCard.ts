@@ -1,10 +1,14 @@
 import { ProductCard } from './ProductCard';
 import { setElementData } from '../../utils/utils';
 import { IProduct } from '../../types';
+import { Products } from '../Models/Products';
 
 export class CatalogProductCard extends ProductCard {
-  constructor(container: HTMLElement) {
+  private productsModel: Products;
+
+  constructor(container: HTMLElement, productsModel: Products) {
     super(container);
+    this.productsModel = productsModel;
   }
 
   render(data: Partial<IProduct>): HTMLElement {
@@ -15,10 +19,7 @@ export class CatalogProductCard extends ProductCard {
     }
 
     this.container.addEventListener('click', () => {
-      this.container.dispatchEvent(new CustomEvent('product:select', {
-        detail: { id: data.id },
-        bubbles: true
-      }));
+      this.productsModel.setSelectedId(data.id!);
     });
     return this.container;
   }

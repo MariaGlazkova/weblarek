@@ -2,15 +2,18 @@ import { ProductCard } from './ProductCard';
 import { ensureElement, setElementData } from '../../utils/utils';
 import { IProduct } from '../../types';
 import { Basket } from '../Models/Basket';
+import { ModalView } from './ModalView';
 
 export class PreviewProductCard extends ProductCard {
   protected description: HTMLElement;
   private basketModel: Basket;
+  private modalView: ModalView;
 
-  constructor(container: HTMLElement, basketModel: Basket) {
+  constructor(container: HTMLElement, basketModel: Basket, modalView: ModalView) {
     super(container);
     this.description = ensureElement<HTMLElement>('.card__text', this.container);
     this.basketModel = basketModel;
+    this.modalView = modalView;
   }
 
   setDescription(value: string): void {
@@ -36,25 +39,15 @@ export class PreviewProductCard extends ProductCard {
           this.setButtonLabel('Удалить из корзины');
           this.button.disabled = false;
           this.button.addEventListener('click', () => {
-            this.button!.dispatchEvent(new CustomEvent('product:remove', {
-              detail: { id: data.id },
-              bubbles: true
-            }));
-            this.button!.dispatchEvent(new CustomEvent('modal:close', {
-              bubbles: true
-            }));
+            this.basketModel.remove(data.id!);
+            this.modalView.close();
           });
         } else {
           this.setButtonLabel('Купить');
           this.button.disabled = false;
           this.button.addEventListener('click', () => {
-            this.button!.dispatchEvent(new CustomEvent('product:add', {
-              detail: { id: data.id },
-              bubbles: true
-            }));
-            this.button!.dispatchEvent(new CustomEvent('modal:close', {
-              bubbles: true
-            }));
+            this.basketModel.add(data as IProduct);
+            this.modalView.close();
           });
         }
       }

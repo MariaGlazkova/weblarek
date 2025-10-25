@@ -1,28 +1,38 @@
 import { ProductCard } from './ProductCard';
-import { setElementData } from '../../utils/utils';
+import { setElementData, ensureElement } from '../../utils/utils';
 import { IProduct } from '../../types';
+import { Basket } from '../Models/Basket';
 
 export class BasketProductCard extends ProductCard {
-  constructor(container: HTMLElement) {
+  protected indexElement: HTMLElement;
+  private basketModel: Basket;
+
+  constructor(container: HTMLElement, basketModel: Basket) {
     super(container);
+    this.basketModel = basketModel;
+    this.indexElement = ensureElement<HTMLElement>('.basket__item-index', this.container);
   }
 
-  render(data: Partial<IProduct>): HTMLElement {
+  render(data: Partial<IProduct>, index?: number): HTMLElement {
     super.render(data);
-    this.setButtonLabel('Удалить');
 
     if (data.id) {
       setElementData(this.container, { id: data.id });
     }
 
+    if (index !== undefined) {
+      this.setIndex(index);
+    }
+
     if (this.button) {
       this.button.addEventListener('click', () => {
-        document.dispatchEvent(new CustomEvent('product:remove', {
-          detail: { id: data.id },
-          bubbles: true
-        }));
+        this.basketModel.remove(data.id!);
       });
     }
     return this.container;
+  }
+
+  setIndex(index: number): void {
+    this.indexElement.textContent = index.toString();
   }
 }

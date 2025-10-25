@@ -39,8 +39,4 @@ export class ModalView extends Component<HTMLElement> {
   getContent(): HTMLElement {
     return this.contentElement;
   }
-
-  render(): HTMLElement {
-    return this.container;
-  }
 }

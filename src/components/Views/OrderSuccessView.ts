@@ -20,9 +20,4 @@ export class OrderSuccessView extends Component<IOrderSuccessData> {
   setTotal(total: number): void {
     this.totalElement.textContent = `Списано ${total} синапсов`;
   }
-
-  render(data: IOrderSuccessData): HTMLElement {
-    this.setTotal(data.total);
-    return this.container;
-  }
 }

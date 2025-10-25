@@ -14,6 +14,7 @@ export class ContactForm extends Form {
     this.phoneInput = ensureElement<HTMLInputElement>('input[name="phone"]', this.container);
 
     this.setupValidation();
+    this.updateButtonState();
   }
 
   setEmail(value: string): void {
@@ -29,18 +30,16 @@ export class ContactForm extends Form {
   validate(): Record<string, string> {
     const errors: Record<string, string> = {};
 
-    this.buyerModel.set({
-      email: this.emailInput.value,
-      phone: this.phoneInput.value
-    });
-
-    const validation = this.buyerModel.validate();
-
-    if (validation.email) {
-      errors.email = validation.email;
+    if (!this.emailInput.value.trim()) {
+      errors.email = 'Укажите емэйл';
+    } else {
+      this.buyerModel.set({ email: this.emailInput.value });
     }
-    if (validation.phone) {
-      errors.phone = validation.phone;
+
+    if (!this.phoneInput.value.trim()) {
+      errors.phone = 'Укажите номер телефона';
+    } else {
+      this.buyerModel.set({ phone: this.phoneInput.value });
     }
 
     return errors;
@@ -64,12 +63,14 @@ export class ContactForm extends Form {
   }
 
   private setupValidation(): void {
-    this.emailInput.addEventListener('input', () => {
-      this.updateButtonState();
-    });
+    const updateValidation = () => this.updateButtonState();
 
-    this.phoneInput.addEventListener('input', () => {
-      this.updateButtonState();
-    });
+    this.emailInput.addEventListener('input', updateValidation);
+    this.emailInput.addEventListener('change', updateValidation);
+    this.emailInput.addEventListener('blur', updateValidation);
+
+    this.phoneInput.addEventListener('input', updateValidation);
+    this.phoneInput.addEventListener('change', updateValidation);
+    this.phoneInput.addEventListener('blur', updateValidation);
   }
 }

@@ -18,15 +18,12 @@ export class PaymentForm extends Form {
       button.addEventListener('click', () => {
         this.paymentOptions.forEach(btn => btn.classList.remove('button_alt-active'));
         button.classList.add('button_alt-active');
-        this.container.dispatchEvent(new CustomEvent('payment:change', {
-          detail: { payment: button.name as TPayment },
-          bubbles: true
-        }));
-            setTimeout(() => this.updateButtonState(), 0);
+        this.buyerModel.set({ payment: button.name as TPayment });
       });
     });
 
     this.setupValidation();
+    this.updateButtonState();
   }
 
   setPayment(value: TPayment): void {
@@ -47,18 +44,16 @@ export class PaymentForm extends Form {
     const errors: Record<string, string> = {};
 
     const selectedPayment = this.container.querySelector('button.button_alt-active') as HTMLButtonElement;
-    if (selectedPayment) {
+    if (!selectedPayment) {
+      errors.payment = 'Не выбран вид оплаты';
+    } else {
       this.buyerModel.set({ payment: selectedPayment.name as TPayment });
     }
-    this.buyerModel.set({ address: this.addressInput.value });
 
-    const validation = this.buyerModel.validate();
-
-    if (validation.payment) {
-      errors.payment = validation.payment;
-    }
-    if (validation.address) {
-      errors.address = validation.address;
+    if (!this.addressInput.value.trim()) {
+      errors.address = 'Укажите адрес';
+    } else {
+      this.buyerModel.set({ address: this.addressInput.value });
     }
 
     return errors;
@@ -81,8 +76,16 @@ export class PaymentForm extends Form {
   }
 
   private setupValidation(): void {
-    this.addressInput.addEventListener('input', () => {
-      this.updateButtonState();
+    const updateValidation = () => this.updateButtonState();
+
+    this.addressInput.addEventListener('input', updateValidation);
+    this.addressInput.addEventListener('change', updateValidation);
+    this.addressInput.addEventListener('blur', updateValidation);
+
+    this.paymentOptions.forEach(button => {
+      button.addEventListener('click', () => {
+        setTimeout(updateValidation, 0);
+      });
     });
   }
 }

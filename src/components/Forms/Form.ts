@@ -32,7 +32,7 @@ export class Form extends Component<HTMLFormElement> {
     this.submitButton.disabled = !active;
   }
 
-  render(): HTMLElement {
+  getContainer(): HTMLElement {
     return this.container;
   }
 }
