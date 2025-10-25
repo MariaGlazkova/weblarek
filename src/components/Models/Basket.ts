@@ -1,5 +1,5 @@
 import { IProduct } from '../../types/index.ts'
-import { EventEmitter } from '../base/Events'
+import { EventEmitter, APP_EVENTS } from '../base/Events'
 
 export class Basket extends EventEmitter {
   items: IProduct[];
@@ -15,17 +15,17 @@ export class Basket extends EventEmitter {
 
   add(item: IProduct): void {
     this.items.push(item);
-    this.emit('basket:add', { item });
+    this.emit(APP_EVENTS.PRODUCTS.ADD, { item });
   }
 
   remove(id: string): void {
     this.items = this.items.filter((item) => item.id != id);
-    this.emit('basket:remove', { id });
+    this.emit(APP_EVENTS.PRODUCTS.REMOVE, { id });
   }
 
   clear(): void {
     this.items = [];
-    this.emit('basket:clear');
+    this.emit(APP_EVENTS.BASKET.CLEAR);
   }
 
   getTotal(): number {

@@ -2,6 +2,7 @@ import { ProductCard } from './ProductCard';
 import { setElementData } from '../../utils/utils';
 import { IProduct } from '../../types';
 import { Products } from '../Models/Products';
+import { APP_EVENTS } from '../base/Events';
 
 export class CatalogProductCard extends ProductCard {
   private productsModel: Products;
@@ -19,7 +20,7 @@ export class CatalogProductCard extends ProductCard {
     }
 
     this.container.addEventListener('click', () => {
-      this.productsModel.setSelectedId(data.id!);
+      this.productsModel.emit(APP_EVENTS.PRODUCTS.SELECT, { id: data.id! });
     });
     return this.container;
   }

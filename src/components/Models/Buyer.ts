@@ -1,5 +1,5 @@
 import {IBuyer, TPayment, IBuyerValidation} from '../../types/index.ts'
-import { EventEmitter } from '../base/Events'
+import { EventEmitter, APP_EVENTS } from '../base/Events'
 
 export class Buyer extends EventEmitter {
   payment: TPayment;
@@ -18,19 +18,19 @@ export class Buyer extends EventEmitter {
   set(data: Partial<IBuyer>): void {
     if (data.payment) {
       this.payment = data.payment;
-      this.emit('buyer:payment:change', { payment: data.payment });
+      this.emit(APP_EVENTS.BUYER.PAYMENT_CHANGE, { payment: data.payment });
     }
     if (data.email) {
       this.email = data.email;
-      this.emit('buyer:email:change', { email: data.email });
+      this.emit(APP_EVENTS.BUYER.EMAIL_CHANGE, { email: data.email });
     }
     if (data.phone) {
       this.phone = data.phone;
-      this.emit('buyer:phone:change', { phone: data.phone });
+      this.emit(APP_EVENTS.BUYER.PHONE_CHANGE, { phone: data.phone });
     }
     if (data.address) {
       this.address = data.address;
-      this.emit('buyer:address:change', { address: data.address });
+      this.emit(APP_EVENTS.BUYER.ADDRESS_CHANGE, { address: data.address });
     }
   }
 

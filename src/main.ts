@@ -6,7 +6,7 @@ import { Api } from './components/base/Api';
 import { Communication } from './components/Models/Communication';
 import { API_URL } from './utils/constants';
 import { cloneTemplate, ensureElement } from './utils/utils';
-import { EventEmitter } from './components/base/Events';
+import { EventEmitter, APP_EVENTS } from './components/base/Events';
 import { apiProducts } from './utils/data';
 
 import { HeaderView } from './components/Views/HeaderView';
@@ -56,7 +56,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function initializeEventHandlers() {
-  productsModel.on('items:changed', () => {
+  productsModel.on(APP_EVENTS.PRODUCTS.ITEMS_CHANGED, () => {
     const items = productsModel.getItems();
     const cards = items.map(item => {
       const cardElement = cloneTemplate<HTMLElement>('#card-catalog');
@@ -67,7 +67,7 @@ function initializeEventHandlers() {
     galleryView.setCatalog(cards);
   });
 
-  productsModel.on('product:select', (data: { id: string | null }) => {
+  productsModel.on(APP_EVENTS.PRODUCTS.SELECT, (data: { id: string | null }) => {
     if (data.id) {
       const product = productsModel.getItemById(data.id);
       if (product) {
@@ -79,37 +79,37 @@ function initializeEventHandlers() {
     }
   });
 
-  basketModel.on('basket:add', () => {
+  basketModel.on(APP_EVENTS.PRODUCTS.ADD, () => {
     updateBasketView();
     updateBasketModalContent();
     updateHeaderCounter();
   });
 
-  basketModel.on('basket:remove', () => {
+  basketModel.on(APP_EVENTS.PRODUCTS.REMOVE, () => {
     updateBasketView();
     updateBasketModalContent();
     updateHeaderCounter();
   });
 
-  basketModel.on('basket:clear', () => {
+  basketModel.on(APP_EVENTS.BASKET.CLEAR, () => {
     updateBasketView();
     updateBasketModalContent();
     updateHeaderCounter();
   });
 
-  buyerModel.on('buyer:payment:change', () => {
+  buyerModel.on(APP_EVENTS.BUYER.PAYMENT_CHANGE, () => {
   });
 
-  buyerModel.on('buyer:address:change', () => {
+  buyerModel.on(APP_EVENTS.BUYER.ADDRESS_CHANGE, () => {
   });
 
-  buyerModel.on('buyer:email:change', () => {
+  buyerModel.on(APP_EVENTS.BUYER.EMAIL_CHANGE, () => {
   });
 
-  buyerModel.on('buyer:phone:change', () => {
+  buyerModel.on(APP_EVENTS.BUYER.PHONE_CHANGE, () => {
   });
 
-  eventEmitter.on('basket:order', () => {
+  eventEmitter.on(APP_EVENTS.BASKET.ORDER, () => {
     showPaymentForm();
   });
 

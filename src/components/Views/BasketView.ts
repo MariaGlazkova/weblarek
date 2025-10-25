@@ -1,6 +1,6 @@
 import { Component } from '../base/Component';
 import { ensureElement } from '../../utils/utils';
-import { EventEmitter } from '../base/Events';
+import { EventEmitter, APP_EVENTS } from '../base/Events';
 
 export interface IBasketData {
   items: HTMLElement[];
@@ -22,7 +22,7 @@ export class BasketView extends Component<IBasketData> {
     this.buttonOrder = ensureElement<HTMLButtonElement>('.basket__button', this.container);
 
     this.buttonOrder.addEventListener('click', () => {
-      this.eventEmitter.emit('basket:order');
+      this.eventEmitter.emit(APP_EVENTS.BASKET.ORDER);
     });
   }
 

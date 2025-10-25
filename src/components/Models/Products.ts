@@ -1,5 +1,5 @@
 import { IProduct } from '../../types/index.ts'
-import { EventEmitter } from '../base/Events'
+import { EventEmitter, APP_EVENTS } from '../base/Events'
 
 export class Products extends EventEmitter {
   items: IProduct[];
@@ -16,7 +16,7 @@ export class Products extends EventEmitter {
 
   setItems(items: IProduct[]): void {
     this.items = items;
-    this.emit('items:changed', { items });
+    this.emit(APP_EVENTS.PRODUCTS.ITEMS_CHANGED, { items });
   }
 
   getItemById(id: string): IProduct | null {
@@ -29,7 +29,7 @@ export class Products extends EventEmitter {
 
   setSelectedId(id: string | null): void {
     this.selectedId = id;
-    this.emit('product:select', { id });
+    this.emit(APP_EVENTS.PRODUCTS.SELECT, { id });
   }
 
   getSelected(): IProduct | null {

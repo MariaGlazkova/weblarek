@@ -7,6 +7,49 @@ type EmitterEvent = {
     data: unknown
 };
 
+export enum AppEvents {
+    // Products events
+    PRODUCTS_ITEMS_CHANGED = 'items:changed',
+    PRODUCT_SELECT = 'product:select',
+    PRODUCT_ADD = 'product:add',
+    PRODUCT_REMOVE = 'product:remove',
+
+    // Basket events
+    BASKET_ORDER = 'basket:order',
+    BASKET_CLEAR = 'basket:clear',
+
+    // Buyer events
+    BUYER_PAYMENT_CHANGE = 'buyer:payment:change',
+    BUYER_ADDRESS_CHANGE = 'buyer:address:change',
+    BUYER_EMAIL_CHANGE = 'buyer:email:change',
+    BUYER_PHONE_CHANGE = 'buyer:phone:change',
+
+    // Order events
+    ORDER_SUBMIT = 'order:submit'
+}
+
+export const APP_EVENTS = {
+    PRODUCTS: {
+        ITEMS_CHANGED: AppEvents.PRODUCTS_ITEMS_CHANGED,
+        SELECT: AppEvents.PRODUCT_SELECT,
+        ADD: AppEvents.PRODUCT_ADD,
+        REMOVE: AppEvents.PRODUCT_REMOVE
+    },
+    BASKET: {
+        ORDER: AppEvents.BASKET_ORDER,
+        CLEAR: AppEvents.BASKET_CLEAR
+    },
+    BUYER: {
+        PAYMENT_CHANGE: AppEvents.BUYER_PAYMENT_CHANGE,
+        ADDRESS_CHANGE: AppEvents.BUYER_ADDRESS_CHANGE,
+        EMAIL_CHANGE: AppEvents.BUYER_EMAIL_CHANGE,
+        PHONE_CHANGE: AppEvents.BUYER_PHONE_CHANGE
+    },
+    ORDER: {
+        SUBMIT: AppEvents.ORDER_SUBMIT
+    }
+} as const;
+
 export interface IEvents {
     on<T extends object>(event: EventName, callback: (data: T) => void): void;
     emit<T extends object>(event: string, data?: T): void;

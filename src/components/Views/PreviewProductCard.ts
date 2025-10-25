@@ -3,6 +3,7 @@ import { ensureElement, setElementData } from '../../utils/utils';
 import { IProduct } from '../../types';
 import { Basket } from '../Models/Basket';
 import { ModalView } from './ModalView';
+import { APP_EVENTS } from '../base/Events';
 
 export class PreviewProductCard extends ProductCard {
   protected description: HTMLElement;
@@ -39,14 +40,14 @@ export class PreviewProductCard extends ProductCard {
           this.setButtonLabel('Удалить из корзины');
           this.button.disabled = false;
           this.button.addEventListener('click', () => {
-            this.basketModel.remove(data.id!);
+            this.basketModel.emit(APP_EVENTS.PRODUCTS.REMOVE, { id: data.id! });
             this.modalView.close();
           });
         } else {
           this.setButtonLabel('Купить');
           this.button.disabled = false;
           this.button.addEventListener('click', () => {
-            this.basketModel.add(data as IProduct);
+            this.basketModel.emit(APP_EVENTS.PRODUCTS.ADD, data as IProduct);
             this.modalView.close();
           });
         }
