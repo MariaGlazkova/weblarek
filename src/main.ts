@@ -72,7 +72,7 @@ function initializeEventHandlers() {
       const product = productsModel.getItemById(data.id);
       if (product) {
         const cardElement = cloneTemplate<HTMLElement>('#card-preview');
-        const cardView = new PreviewProductCard(cardElement, basketModel, modalView);
+        const cardView = new PreviewProductCard(cardElement, basketModel, productsModel, modalView);
         cardView.render(product);
         modalView.open(cardElement);
       }

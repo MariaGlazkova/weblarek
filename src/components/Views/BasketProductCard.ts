@@ -2,7 +2,6 @@ import { ProductCard } from './ProductCard';
 import { setElementData, ensureElement } from '../../utils/utils';
 import { IProduct } from '../../types';
 import { Basket } from '../Models/Basket';
-import { APP_EVENTS } from '../base/Events';
 
 export class BasketProductCard extends ProductCard {
   protected indexElement: HTMLElement;
@@ -27,7 +26,7 @@ export class BasketProductCard extends ProductCard {
 
     if (this.button) {
       this.button.addEventListener('click', () => {
-        this.basketModel.emit(APP_EVENTS.PRODUCTS.REMOVE, { id: data.id! });
+        this.basketModel.remove(data.id!);
       });
     }
     return this.container;
