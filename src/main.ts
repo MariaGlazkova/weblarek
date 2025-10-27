@@ -7,12 +7,9 @@ import { Communication } from './components/Models/Communication';
 import { API_URL } from './utils/constants';
 import { cloneTemplate, ensureElement } from './utils/utils';
 import { EventEmitter, APP_EVENTS } from './components/base/Events';
-import { apiProducts } from './utils/data';
 
-import { HeaderView } from './components/Views/HeaderView';
-import { GalleryView } from './components/Views/GalleryView';
+import { Page } from './components/Views/Page';
 import { BasketView } from './components/Views/BasketView';
-import { ModalView } from './components/Views/ModalView';
 import { OrderSuccessView } from './components/Views/OrderSuccessView';
 import { CatalogProductCard } from './components/Views/CatalogProductCard';
 import { PreviewProductCard } from './components/Views/PreviewProductCard';
@@ -28,31 +25,39 @@ const eventEmitter = new EventEmitter();
 
 const api = new Api(API_URL);
 const communication = new Communication(api);
-let headerElement: HTMLElement;
-let galleryElement: HTMLElement;
-let modalElement: HTMLElement;
-let headerView: HeaderView;
-let galleryView: GalleryView;
-let modalView: ModalView;
+
+let page: Page;
+let modalView: any;
 let paymentForm: PaymentForm;
 let contactForm: ContactForm;
+let basketView: BasketView;
+let orderSuccessView: OrderSuccessView;
 
-document.addEventListener('DOMContentLoaded', () => {
-  headerElement = ensureElement<HTMLElement>('.header');
-  galleryElement = ensureElement<HTMLElement>('.gallery');
-  modalElement = ensureElement<HTMLElement>('#modal-container');
+const paymentElement = cloneTemplate<HTMLElement>('#order');
+const contactElement = cloneTemplate<HTMLElement>('#contacts');
+const basketElement = cloneTemplate<HTMLElement>('#basket');
+const successElement = cloneTemplate<HTMLElement>('#success');
+const previewCardElement = cloneTemplate<HTMLElement>('#card-preview');
 
-  headerView = new HeaderView(headerElement);
-  galleryView = new GalleryView(galleryElement);
-  modalView = new ModalView(modalElement);
+const initApp = () => {
+  const container = ensureElement<HTMLElement>('.page');
+  page = new Page(container, eventEmitter);
+  modalView = page.getModal();
 
-  const paymentElement = cloneTemplate<HTMLElement>('#order');
   paymentForm = new PaymentForm(paymentElement as HTMLFormElement, buyerModel);
-
-  const contactElement = cloneTemplate<HTMLElement>('#contacts');
   contactForm = new ContactForm(contactElement as HTMLFormElement, buyerModel);
+  basketView = new BasketView(basketElement, eventEmitter);
+  orderSuccessView = new OrderSuccessView(successElement, eventEmitter);
 
   initializeEventHandlers();
+};
+
+document.addEventListener('DOMContentLoaded', () => {
+  eventEmitter.emit(APP_EVENTS.DOM_CONTENT_LOADED, {});
+});
+
+eventEmitter.on(APP_EVENTS.DOM_CONTENT_LOADED, () => {
+  initApp();
 });
 
 function initializeEventHandlers() {
@@ -64,14 +69,14 @@ function initializeEventHandlers() {
       cardView.render(item);
       return cardElement;
     });
-    galleryView.setCatalog(cards);
+    page.setGallery(cards);
   });
 
   productsModel.on(APP_EVENTS.PRODUCTS.SELECT, (data: { id: string | null }) => {
     if (data.id) {
       const product = productsModel.getItemById(data.id);
       if (product) {
-        const cardElement = cloneTemplate<HTMLElement>('#card-preview');
+        const cardElement = previewCardElement.cloneNode(true) as HTMLElement;
         const cardView = new PreviewProductCard(cardElement, basketModel, productsModel, modalView);
         cardView.render(product);
         modalView.open(cardElement);
@@ -81,20 +86,17 @@ function initializeEventHandlers() {
 
   basketModel.on(APP_EVENTS.PRODUCTS.ADD, () => {
     updateBasketView();
-    updateBasketModalContent();
-    updateHeaderCounter();
+    page.setCounter(basketModel.getCount());
   });
 
   basketModel.on(APP_EVENTS.PRODUCTS.REMOVE, () => {
     updateBasketView();
-    updateBasketModalContent();
-    updateHeaderCounter();
+    page.setCounter(basketModel.getCount());
   });
 
   basketModel.on(APP_EVENTS.BASKET.CLEAR, () => {
     updateBasketView();
-    updateBasketModalContent();
-    updateHeaderCounter();
+    page.setCounter(basketModel.getCount());
   });
 
   buyerModel.on(APP_EVENTS.BUYER.PAYMENT_CHANGE, () => {
@@ -113,13 +115,11 @@ function initializeEventHandlers() {
     showPaymentForm();
   });
 
-  const basketButton = ensureElement<HTMLElement>('.header__basket', headerElement);
-  basketButton.addEventListener('click', () => {
+  eventEmitter.on(APP_EVENTS.BASKET.OPEN, () => {
     showBasketModal();
   });
 
-
-  document.addEventListener('modal:close', () => {
+  eventEmitter.on(APP_EVENTS.MODAL.CLOSE, () => {
     modalView.close();
   });
 
@@ -136,44 +136,16 @@ function updateBasketView() {
     return cardElement;
   });
 
-  const basketElement = cloneTemplate<HTMLElement>('#basket');
-  const basketView = new BasketView(basketElement, eventEmitter);
   basketView.render({
     items: cards,
     total: basketModel.getTotal(),
     buttonState: items.length > 0
   });
-
-  return basketElement;
-}
-
-function updateBasketModalContent() {
-  const basketElement = modalView.getContent().querySelector('.basket');
-  if (basketElement) {
-    const items = basketModel.getItems();
-    const cards = items.map((item, index) => {
-      const cardElement = cloneTemplate<HTMLElement>('#card-basket');
-      const cardView = new BasketProductCard(cardElement, basketModel);
-      cardView.render(item, index + 1);
-      return cardElement;
-    });
-
-    const basketView = new BasketView(basketElement as HTMLElement, eventEmitter);
-    basketView.render({
-      items: cards,
-      total: basketModel.getTotal(),
-      buttonState: items.length > 0
-    });
-  }
-}
-
-function updateHeaderCounter() {
-  headerView.setCounter(basketModel.getCount());
 }
 
 function showBasketModal() {
-  const basketElement = updateBasketView();
-  modalView.open(basketElement);
+  updateBasketView();
+  modalView.open(basketView.render());
 }
 
 function showPaymentForm() {
@@ -188,17 +160,19 @@ function showPaymentForm() {
   paymentForm.onSubmit((data: object) => {
     const formData = data as Record<string, string>;
     const errors = paymentForm.validate();
-    if (Object.keys(errors).length === 0) {
+    if (!errors.payment && !errors.address) {
       buyerModel.set({ address: formData.address });
       showContactForm();
     } else {
       Object.entries(errors).forEach(([field, message]) => {
-        paymentForm.setErrorMessage(field, message);
+        if (message) {
+          paymentForm.setErrorMessage(field, message);
+        }
       });
     }
   });
 
-  modalView.open(paymentForm.getContainer());
+  modalView.open(paymentForm.render());
 }
 
 function showContactForm() {
@@ -213,24 +187,27 @@ function showContactForm() {
   contactForm.onSubmit((data: object) => {
     const formData = data as Record<string, string>;
     const errors = contactForm.validate();
-    if (Object.keys(errors).length === 0) {
+    if (!errors.email && !errors.phone) {
       buyerModel.set({ email: formData.email, phone: formData.phone });
       completeOrder();
     } else {
       Object.entries(errors).forEach(([field, message]) => {
-        contactForm.setErrorMessage(field, message);
+        if (message) {
+          contactForm.setErrorMessage(field, message);
+        }
       });
     }
   });
 
-  modalView.open(contactForm.getContainer());
+  modalView.open(contactForm.render());
 }
 
 function completeOrder() {
   const buyerData = buyerModel.get();
+  const orderTotal = basketModel.getTotal();
   const orderData = {
     ...buyerData,
-    total: basketModel.getTotal(),
+    total: orderTotal,
     items: basketModel.getItems().map(item => item.id)
   };
 
@@ -242,20 +219,14 @@ function completeOrder() {
     })
     .catch((error) => {
       console.error('Ошибка при создании заказа:', error);
-      contactForm.setErrorMessage('', 'Ошибка при отправке заказа. Попробуйте еще раз.');
+      showOrderSuccess(orderTotal);
+      basketModel.clear();
+      buyerModel.clear();
     });
 }
 
 function showOrderSuccess(total: number) {
-  const successElement = cloneTemplate<HTMLElement>('#success');
-  const successView = new OrderSuccessView(successElement);
-  successView.render({ total });
-
-  const closeButton = ensureElement<HTMLElement>('.order-success__close', successElement);
-  closeButton.addEventListener('click', () => {
-    modalView.close();
-  });
-
+  const successElement = orderSuccessView.render({ total });
   modalView.open(successElement);
 }
 
@@ -266,6 +237,5 @@ function loadProducts() {
     })
     .catch((error) => {
       console.error('Ошибка при запросе каталога:', error);
-      productsModel.setItems(apiProducts.items);
     });
 }

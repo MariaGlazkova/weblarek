@@ -20,4 +20,11 @@ export class HeaderView extends Component<IHeaderData> {
       this.counterElement.textContent = value.toString();
     }
   }
+
+  render(data?: Partial<IHeaderData>): HTMLElement {
+    if (data?.counter !== undefined) {
+      this.setCounter(data.counter);
+    }
+    return this.container;
+  }
 }

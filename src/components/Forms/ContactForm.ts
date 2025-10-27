@@ -1,6 +1,7 @@
 import { Form } from './Form';
 import { ensureElement } from '../../utils/utils';
 import { Buyer } from '../Models/Buyer';
+import { IBuyerValidation } from '../../types';
 
 export class ContactForm extends Form {
   protected emailInput: HTMLInputElement;
@@ -19,44 +20,37 @@ export class ContactForm extends Form {
 
   setEmail(value: string): void {
     this.emailInput.value = value;
+    this.buyerModel.set({ email: value });
     this.updateButtonState();
   }
 
   setPhone(value: string): void {
     this.phoneInput.value = value;
+    this.buyerModel.set({ phone: value });
     this.updateButtonState();
   }
 
-  validate(): Record<string, string> {
-    const errors: Record<string, string> = {};
+  validate(): IBuyerValidation {
+    this.buyerModel.set({
+      email: this.emailInput.value,
+      phone: this.phoneInput.value
+    });
 
-    if (!this.emailInput.value.trim()) {
-      errors.email = 'Укажите емэйл';
-    } else {
-      this.buyerModel.set({ email: this.emailInput.value });
-    }
-
-    if (!this.phoneInput.value.trim()) {
-      errors.phone = 'Укажите номер телефона';
-    } else {
-      this.buyerModel.set({ phone: this.phoneInput.value });
-    }
-
-    return errors;
+    return this.buyerModel.validate();
   }
 
 
   private updateButtonState(): void {
     const errors = this.validate();
-    const isValid = Object.keys(errors).length === 0;
-    this.setButtonState(isValid);
+    const hasErrors = errors.email || errors.phone;
+    this.setButtonState(!hasErrors);
 
     this.displayErrors(errors);
   }
 
-  private displayErrors(errors: Record<string, string>): void {
+  private displayErrors(errors: IBuyerValidation): void {
     this.clearErrors();
-    const firstError = Object.values(errors)[0];
+    const firstError = errors.email || errors.phone;
     if (firstError) {
       this.setErrorMessage('', firstError);
     }

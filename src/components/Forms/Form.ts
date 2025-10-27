@@ -31,8 +31,4 @@ export class Form extends Component<HTMLFormElement> {
   setButtonState(active: boolean): void {
     this.submitButton.disabled = !active;
   }
-
-  getContainer(): HTMLElement {
-    return this.container;
-  }
 }

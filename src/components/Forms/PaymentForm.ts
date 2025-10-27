@@ -2,6 +2,7 @@ import { Form } from './Form';
 import { ensureElement, ensureAllElements } from '../../utils/utils';
 import { TPayment } from '../../types';
 import { Buyer } from '../Models/Buyer';
+import { IBuyerValidation } from '../../types';
 
 export class PaymentForm extends Form {
   protected paymentOptions: HTMLButtonElement[];
@@ -19,6 +20,7 @@ export class PaymentForm extends Form {
         this.paymentOptions.forEach(btn => btn.classList.remove('button_alt-active'));
         button.classList.add('button_alt-active');
         this.buyerModel.set({ payment: button.name as TPayment });
+        this.updateButtonState();
       });
     });
 
@@ -37,55 +39,42 @@ export class PaymentForm extends Form {
 
   setAddress(value: string): void {
     this.addressInput.value = value;
+    this.buyerModel.set({ address: value });
     this.updateButtonState();
   }
 
-  validate(): Record<string, string> {
-    const errors: Record<string, string> = {};
-
-    const selectedPayment = this.container.querySelector('button.button_alt-active') as HTMLButtonElement;
-    if (!selectedPayment) {
-      errors.payment = 'Не выбран вид оплаты';
-    } else {
+  validate(): IBuyerValidation {
+    try {
+      const selectedPayment = ensureElement<HTMLButtonElement>('button.button_alt-active', this.container);
       this.buyerModel.set({ payment: selectedPayment.name as TPayment });
+    } catch {
+      this.buyerModel.set({ payment: '' });
     }
 
-    if (!this.addressInput.value.trim()) {
-      errors.address = 'Укажите адрес';
-    } else {
-      this.buyerModel.set({ address: this.addressInput.value });
-    }
+    this.buyerModel.set({ address: this.addressInput.value });
 
-    return errors;
+    return this.buyerModel.validate();
   }
 
   private updateButtonState(): void {
     const errors = this.validate();
-    const isValid = Object.keys(errors).length === 0;
-    this.setButtonState(isValid);
+    const hasErrors = errors.payment || errors.address;
+    this.setButtonState(!hasErrors);
 
     this.displayErrors(errors);
   }
 
-  private displayErrors(errors: Record<string, string>): void {
+  private displayErrors(errors: IBuyerValidation): void {
     this.clearErrors();
-    const firstError = Object.values(errors)[0];
+    const firstError = errors.payment || errors.address;
     if (firstError) {
       this.setErrorMessage('', firstError);
     }
   }
 
   private setupValidation(): void {
-    const updateValidation = () => this.updateButtonState();
-
-    this.addressInput.addEventListener('input', updateValidation);
-    this.addressInput.addEventListener('change', updateValidation);
-    this.addressInput.addEventListener('blur', updateValidation);
-
-    this.paymentOptions.forEach(button => {
-      button.addEventListener('click', () => {
-        setTimeout(updateValidation, 0);
-      });
-    });
+    this.addressInput.addEventListener('input', () => this.updateButtonState());
+    this.addressInput.addEventListener('change', () => this.updateButtonState());
+    this.addressInput.addEventListener('blur', () => this.updateButtonState());
   }
 }

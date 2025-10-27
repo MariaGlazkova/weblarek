@@ -16,19 +16,19 @@ export class Buyer extends EventEmitter {
   }
 
   set(data: Partial<IBuyer>): void {
-    if (data.payment) {
+    if (data.payment !== undefined) {
       this.payment = data.payment;
       this.emit(APP_EVENTS.BUYER.PAYMENT_CHANGE, { payment: data.payment });
     }
-    if (data.email) {
+    if (data.email !== undefined) {
       this.email = data.email;
       this.emit(APP_EVENTS.BUYER.EMAIL_CHANGE, { email: data.email });
     }
-    if (data.phone) {
+    if (data.phone !== undefined) {
       this.phone = data.phone;
       this.emit(APP_EVENTS.BUYER.PHONE_CHANGE, { phone: data.phone });
     }
-    if (data.address) {
+    if (data.address !== undefined) {
       this.address = data.address;
       this.emit(APP_EVENTS.BUYER.ADDRESS_CHANGE, { address: data.address });
     }

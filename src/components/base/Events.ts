@@ -8,6 +8,9 @@ type EmitterEvent = {
 };
 
 export enum AppEvents {
+    // App events
+    DOM_CONTENT_LOADED = 'dom:content:loaded',
+
     // Products events
     PRODUCTS_ITEMS_CHANGED = 'items:changed',
     PRODUCT_SELECT = 'product:select',
@@ -17,6 +20,7 @@ export enum AppEvents {
     // Basket events
     BASKET_ORDER = 'basket:order',
     BASKET_CLEAR = 'basket:clear',
+    BASKET_OPEN = 'basket:open',
 
     // Buyer events
     BUYER_PAYMENT_CHANGE = 'buyer:payment:change',
@@ -25,10 +29,14 @@ export enum AppEvents {
     BUYER_PHONE_CHANGE = 'buyer:phone:change',
 
     // Order events
-    ORDER_SUBMIT = 'order:submit'
+    ORDER_SUBMIT = 'order:submit',
+
+    // Modal events
+    MODAL_CLOSE = 'modal:close'
 }
 
 export const APP_EVENTS = {
+    DOM_CONTENT_LOADED: AppEvents.DOM_CONTENT_LOADED,
     PRODUCTS: {
         ITEMS_CHANGED: AppEvents.PRODUCTS_ITEMS_CHANGED,
         SELECT: AppEvents.PRODUCT_SELECT,
@@ -37,7 +45,8 @@ export const APP_EVENTS = {
     },
     BASKET: {
         ORDER: AppEvents.BASKET_ORDER,
-        CLEAR: AppEvents.BASKET_CLEAR
+        CLEAR: AppEvents.BASKET_CLEAR,
+        OPEN: AppEvents.BASKET_OPEN
     },
     BUYER: {
         PAYMENT_CHANGE: AppEvents.BUYER_PAYMENT_CHANGE,
@@ -47,6 +56,9 @@ export const APP_EVENTS = {
     },
     ORDER: {
         SUBMIT: AppEvents.ORDER_SUBMIT
+    },
+    MODAL: {
+        CLOSE: AppEvents.MODAL_CLOSE
     }
 } as const;
 

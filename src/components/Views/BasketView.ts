@@ -46,10 +46,16 @@ export class BasketView extends Component<IBasketData> {
     this.buttonOrder.disabled = !active;
   }
 
-  render(data: IBasketData): HTMLElement {
-    this.setItems(data.items);
-    this.setTotal(data.total);
-    this.setButtonState(data.buttonState);
+  render(data?: Partial<IBasketData>): HTMLElement {
+    if (data?.items !== undefined) {
+      this.setItems(data.items);
+    }
+    if (data?.total !== undefined) {
+      this.setTotal(data.total);
+    }
+    if (data?.buttonState !== undefined) {
+      this.setButtonState(data.buttonState);
+    }
     return this.container;
   }
 }
